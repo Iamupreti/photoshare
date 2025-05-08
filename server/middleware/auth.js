@@ -1,36 +1,25 @@
-import jwt from "jsonwebtoken"
-import User from "../models/User.js"
-
-export const auth = async (req, res, next) => {
-  try {
-    // Get token from header
-    const token = req.header("Authorization")?.replace("Bearer ", "")
-
-    if (!token) {
-      return res.status(401).json({ message: "No authentication token, access denied" })
+export const isAuthenticated = (req, res, next) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Authentication required" })
     }
-
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
-
-    // Find user
-    const user = await User.findById(decoded.id)
-
-    if (!user) {
-      return res.status(401).json({ message: "User not found" })
-    }
-
-    // Add user to request
-    req.user = user
+  
+    req.userId = req.session.userId
     next()
-  } catch (error) {
-    res.status(401).json({ message: "Token is not valid" })
   }
-}
-
-export const creatorOnly = (req, res, next) => {
-  if (req.user.role !== "creator") {
-    return res.status(403).json({ message: "Access denied. Creator role required." })
+  
+  export const isCreator = async (req, res, next) => {
+    try {
+      const User = (await import("../models/User.js")).default
+      const user = await User.findById(req.userId)
+  
+      if (!user || user.role !== "creator") {
+        return res.status(403).json({ message: "Creator access required" })
+      }
+  
+      next()
+    } catch (err) {
+      console.error(err)
+      res.status(500).json({ message: "Server error" })
+    }
   }
-  next()
-}
+  

@@ -1,29 +1,27 @@
 import mongoose from "mongoose"
 
-const commentSchema = new mongoose.Schema(
-  {
-    photo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Photo",
-      required: true,
-    },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    text: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 500,
-    },
+const CommentSchema = new mongoose.Schema({
+  media: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Media",
+    required: true,
   },
-  {
-    timestamps: true,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
   },
-)
+  content: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+})
 
-const Comment = mongoose.model("Comment", commentSchema)
+const Comment = mongoose.model("Comment", CommentSchema)
 
 export default Comment
